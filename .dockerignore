@@ -1,0 +1,1 @@
+redis-data/ # mounted in docker-compose.yml
