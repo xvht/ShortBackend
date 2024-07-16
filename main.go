@@ -15,16 +15,11 @@ import (
 var (
 	PORT      = os.Getenv("PORT")
 	REDIS_URI = os.Getenv("REDIS_URI")
-	BASE_URL  = os.Getenv("BASE_URL")
 )
 
 func init() {
 	if redisURI := os.Getenv("REDIS_URI"); redisURI != "" {
 		REDIS_URI = redisURI
-	}
-
-	if baseUrl := os.Getenv("BASE_URL"); baseUrl != "" {
-		BASE_URL = baseUrl
 	}
 
 	if port := os.Getenv("PORT"); port != "" {
@@ -81,8 +76,7 @@ func main() {
 		redisClient.Set(c.Context(), id, body.URL, 0)
 
 		return c.JSON(fiber.Map{
-			"id":   id,
-			"link": fmt.Sprintf("%s/%s", BASE_URL, id),
+			"id": id,
 		})
 	})
 
