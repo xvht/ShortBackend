@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 
+	urlverifier "github.com/davidmytton/url-verifier"
 	"github.com/gofiber/fiber/v2"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/redis/go-redis/v9"
@@ -32,11 +33,20 @@ func init() {
 	}
 }
 
+func validateURL(verifier urlverifier.Verifier, url string) bool {
+	ret, err := verifier.Verify(url)
+	if err != nil {
+		return false
+	}
+	return ret.IsURL
+}
+
 func main() {
 	app := fiber.New(fiber.Config{
 		JSONEncoder: json.Marshal,
 		JSONDecoder: json.Unmarshal,
 	})
+	verifier := *urlverifier.NewVerifier()
 
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: REDIS_URI,
@@ -63,6 +73,12 @@ func main() {
 		} else if body.URL == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "URL is required",
+			})
+		}
+
+		if !validateURL(verifier, body.URL) {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid URL",
 			})
 		}
 
